@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/drone-monitor-website/static/css/main.0dbce0a2.css",
+    "main.js": "/drone-monitor-website/static/js/main.972b9963.js",
+    "static/media/green-drone.svg": "/drone-monitor-website/static/media/green-drone.9f3adf9c15d210e1e4259fdb6482f5ca.svg",
+    "static/media/red-drone.svg": "/drone-monitor-website/static/media/red-drone.383eda8d4c55fd40e694fecfee2b2dbe.svg",
+    "static/media/notification.svg": "/drone-monitor-website/static/media/notification.4281ca65b0136fadfb7edd943515129a.svg",
+    "static/media/pick.svg": "/drone-monitor-website/static/media/pick.a4e636d3e4233a086d605b55033b09a0.svg",
+    "static/media/dashboard.svg": "/drone-monitor-website/static/media/dashboard.2dbbd74c6b0100505e56301f885a6c12.svg",
+    "static/media/map.svg": "/drone-monitor-website/static/media/map.7e82163ea55cbf903df47f3a6c187f6d.svg",
+    "static/media/sager.svg": "/drone-monitor-website/static/media/sager.775868407bfcd6d096fcdbc9b8b074a6.svg",
+    "static/media/x-button.svg": "/drone-monitor-website/static/media/x-button.d8a15c5649ab8fab112d7832cd343a3e.svg",
+    "index.html": "/drone-monitor-website/index.html",
+    "static/media/world.svg": "/drone-monitor-website/static/media/world.fd0f347dca911b34b0fa3bf890b63c33.svg",
+    "static/media/red-icon.svg": "/drone-monitor-website/static/media/red-icon.57a5a6cb89fb7caf6a90e2de61022a3c.svg",
+    "static/media/green-icon.svg": "/drone-monitor-website/static/media/green-icon.d7447a26036c3b9c8323bba22a7dc21b.svg",
+    "main.0dbce0a2.css.map": "/drone-monitor-website/static/css/main.0dbce0a2.css.map",
+    "main.972b9963.js.map": "/drone-monitor-website/static/js/main.972b9963.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0dbce0a2.css",
+    "static/js/main.972b9963.js"
+  ]
+}
