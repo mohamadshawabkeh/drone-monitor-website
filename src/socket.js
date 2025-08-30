@@ -5,14 +5,31 @@ let socketInstance = null;
 
 export function initSocket() {
   if (socketInstance) return socketInstance;
-  const url = process.env.REACT_APP_SOCKET_URL || "http://localhost:9013";
-  const socket = io(url, { transports: ["websocket", "polling"] });
+
+  const envUrl = process.env.REACT_APP_SOCKET_URL;
+  const defaultRemote = "https://drone-monitor-backend.onrender.com";
+  const isProd = process.env.NODE_ENV === "production";
+  const isPageHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
+
+  // Build candidates based on environment
+  let candidates = [];
+  if (isProd) {
+    // In production, prefer remote first
+    candidates = [envUrl || defaultRemote, "http://localhost:9013"]; 
+  } else {
+    // In dev, prefer localhost first then remote
+    candidates = ["http://localhost:9013", envUrl || defaultRemote];
+  }
+
+  // If page is https, trying to connect to http localhost will be blocked as mixed content.
+  if (isPageHttps) {
+    candidates = candidates.filter(u => !/^http:\/\/localhost/i.test(u));
+  }
+
+  // De-duplicate and remove falsy
+  candidates = Array.from(new Set(candidates.filter(Boolean)));
 
   const upsert = useDronesStore.getState().upsertFromFeatureCollection;
-
-  socket.on("connect", () => {
-    console.log("Socket connected", socket.id);
-  });
 
   let batch = [];
   let timer = null;
@@ -30,14 +47,58 @@ export function initSocket() {
       timer = null;
     }
   };
-  socket.on("message", (fc) => {
-    batch.push(fc);
-    if (!timer) timer = setTimeout(flush, FLUSH_MS);
-  });
 
-  socket.on("disconnect", () => {});
+  const attachAfterConnect = (socket, url) => {
+    console.log("Socket connected", socket.id, "->", url);
+    socket.on("message", (fc) => {
+      batch.push(fc);
+      if (!timer) timer = setTimeout(flush, FLUSH_MS);
+    });
+    socket.on("disconnect", () => {});
+  };
 
-  socketInstance = socket;
+  let attemptIndex = 0;
+  const attemptNext = () => {
+    if (attemptIndex >= candidates.length) {
+      console.error("Socket: all connection attempts failed", candidates);
+      return;
+    }
+    const url = candidates[attemptIndex++];
+    console.log("Socket: attempting", url);
+    const socket = io(url, { transports: ["websocket", "polling"], timeout: 4000 });
+
+    let connected = false;
+    const cleanFailAndRetry = (reason) => {
+      if (connected) return; // already connected
+      try {
+        socket.removeAllListeners();
+        socket.disconnect();
+      } catch (_) {}
+      console.warn(`Socket: failed to connect to ${url} (${reason}). Trying next...`);
+      attemptNext();
+    };
+
+    socket.on("connect", () => {
+      connected = true;
+      socketInstance = socket;
+      attachAfterConnect(socket, url);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("Socket connect_error ->", url, err?.message || err);
+      cleanFailAndRetry("connect_error");
+    });
+
+    socket.on("error", (err) => {
+      console.error("Socket error ->", url, err?.message || err);
+    });
+
+    setTimeout(() => {
+      if (!connected) cleanFailAndRetry("timeout");
+    }, 4500);
+  };
+
+  attemptNext();
   return socketInstance;
 }
 
